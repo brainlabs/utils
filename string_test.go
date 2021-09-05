@@ -16,7 +16,6 @@ func TestReplacer(t *testing.T) {
 	}
 
 	for k, v := range testCase {
-		//	assert.Equal(t, v, Replacer(rule,k))
 		ns := StringReplacer(k, rule)
 		if v == ns {
 
