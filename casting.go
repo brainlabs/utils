@@ -140,7 +140,7 @@ func StructExtractFieldValue(src interface{}, tag string) ([]string, []interface
 // StructToBulkInsert extract struct slice tu bulk insert sql
 func StructToBulkInsert(src interface{}, tag string) ([]string, []interface{}, []string, error) {
 	var columns []string
-	var replacers []string
+	var questions []string
 	var values []interface{}
 
 	v := reflect.Indirect(reflect.ValueOf(src))
@@ -154,7 +154,7 @@ func StructToBulkInsert(src interface{}, tag string) ([]string, []interface{}, [
 	}
 
 	if t.Kind() != reflect.Struct {
-		return columns, values, replacers, fmt.Errorf("only accepted %s, got %s", reflect.Struct.String(), t.Kind().String())
+		return columns, values, questions, fmt.Errorf("only accepted %s, got %s", reflect.Struct.String(), t.Kind().String())
 	}
 
 	for i := 0; i < v.Len(); i++ {
@@ -166,7 +166,7 @@ func StructToBulkInsert(src interface{}, tag string) ([]string, []interface{}, [
 
 		cols, val, err := StructExtractFieldValue(item.Interface(), tag)
 		if err != nil {
-			return columns, values, replacers, err
+			return columns, values, questions, err
 		}
 
 		if len(columns) == 0 {
@@ -174,11 +174,11 @@ func StructToBulkInsert(src interface{}, tag string) ([]string, []interface{}, [
 		}
 
 		pattern := fmt.Sprintf(`(%s)`, strings.TrimRight(strings.Repeat("?,", len(columns)), `,`))
-		replacers = append(replacers, pattern)
+		questions = append(questions, pattern)
 		values = append(values, val...)
 	}
 
-	return columns, values, replacers, nil
+	return columns, values, questions, nil
 
 }
 
