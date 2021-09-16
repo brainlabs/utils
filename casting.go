@@ -173,8 +173,8 @@ func StructToBulkInsert(src interface{}, tag string) ([]string, []interface{}, [
 			columns = cols
 		}
 
-		pattern := fmt.Sprintf(`(%s)`, strings.TrimRight(strings.Repeat("?,", len(columns)), `,`))
-		questions = append(questions, pattern)
+		question := fmt.Sprintf(`(%s)`, strings.TrimRight(strings.Repeat("?,", len(columns)), `,`))
+		questions = append(questions, question)
 		values = append(values, val...)
 	}
 
