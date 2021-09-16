@@ -137,6 +137,7 @@ func StructExtractFieldValue(src interface{}, tag string) ([]string, []interface
 	return columns, values, nil
 }
 
+// StructToBulkInsert extract struct slice tu bulk insert sql
 func StructToBulkInsert(src interface{}, tag string) ([]string, []interface{}, []string, error) {
 	var columns []string
 	var replacers []string
@@ -145,7 +146,6 @@ func StructToBulkInsert(src interface{}, tag string) ([]string, []interface{}, [
 	v := reflect.Indirect(reflect.ValueOf(src))
 	t := reflect.TypeOf(src)
 	if t.Kind() == reflect.Ptr {
-		//v = v.Elem()
 		t = t.Elem()
 	}
 
