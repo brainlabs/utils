@@ -137,6 +137,51 @@ func StructExtractFieldValue(src interface{}, tag string) ([]string, []interface
 	return columns, values, nil
 }
 
+func StructToBulkInsert(src interface{}, tag string) ([]string, []interface{}, []string, error) {
+	var columns []string
+	var replacers []string
+	var values []interface{}
+
+	v := reflect.Indirect(reflect.ValueOf(src))
+	t := reflect.TypeOf(src)
+	if t.Kind() == reflect.Ptr {
+		//v = v.Elem()
+		t = t.Elem()
+	}
+
+	if t.Kind() == reflect.Slice {
+		t = t.Elem()
+	}
+
+	if t.Kind() != reflect.Struct {
+		return columns, values, replacers, fmt.Errorf("only accepted %s, got %s", reflect.Struct.String(), t.Kind().String())
+	}
+
+	for i := 0; i < v.Len(); i++ {
+
+		item := v.Index(i)
+		if !item.IsValid() {
+			continue
+		}
+
+		cols, val, err := StructExtractFieldValue(item.Interface(), tag)
+		if err != nil {
+			return columns, values, replacers, err
+		}
+
+		if len(columns) == 0 {
+			columns = cols
+		}
+
+		pattern := fmt.Sprintf(`(%s)`, strings.TrimRight(strings.Repeat("?,", len(columns)), `,`))
+		replacers = append(replacers, pattern)
+		values = append(values, val...)
+	}
+
+	return columns, values, replacers, nil
+
+}
+
 func isTime(obj reflect.Value) bool {
 	_, ok := obj.Interface().(time.Time)
 	return ok
